@@ -1,4 +1,6 @@
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'widgets/list_storage.dart';
 import 'package:flutter/material.dart';
 
@@ -29,15 +31,16 @@ class _NotesState extends State<Notes> {
   List<EachNote> notes = [];
   List<String> completedNotes = [];
   Map<String, dynamic> notesData = {};
+  var inputTextController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
 
     widget.storage.getJson.then((value) {
-        notesData = jsonDecode(value);
-        if (notesData['notes'].length > 0) update(notesData['notes'], false);
-        if (notesData['completedNotes'].length > 0) update(notesData['completedNotes'], true);
+      notesData = jsonDecode(value);
+      if (notesData['notes'].length > 0) update(notesData['notes'], false);
+      if (notesData['completedNotes'].length > 0) update(notesData['completedNotes'], true);
     });
   }
 
@@ -74,6 +77,11 @@ class _NotesState extends State<Notes> {
     });
   }
 
+  void setNotes(List<dynamic> notes, bool completed) {
+    notes = completed? notes : notes.map((each) => [each.name, each.id]).toList();
+    widget.storage.setList(notes, completed);
+  }
+
   void floatingButtonClicked() {
 
     if (selected) {
@@ -81,9 +89,11 @@ class _NotesState extends State<Notes> {
         setState(() {
           notes.insert(0, EachNote(inputText, DateTime.now().microsecondsSinceEpoch.toString()));
           inputText = '';
-          selected = false;
+          inputTextController.clear();
+          // selected = false;
           textAvailable = false;
-          widget.storage.setList(notes.map((each) => [each.name, each.id]).toList(), false);
+          // widget.storage.setList(notes.map((each) => [each.name, each.id]).toList(), false);
+          setNotes(notes, false);
         });
       }
       else{
@@ -104,12 +114,36 @@ class _NotesState extends State<Notes> {
       setState(() => completedNotes.remove(each));
     }
     else setState(() => completedNotes.add(each));
-    widget.storage.setList(List<String>.from(completedNotes), true);
+    // widget.storage.setList(completedNotes, true);
+    setNotes(completedNotes, true);
   }
+
+  void deleteClicked(EachNote each) {
+    setState(() { 
+      notes.remove(each);
+      completedNotes.remove(each.id);
+    });
+    getApplicationDocumentsDirectory().then((dir) {
+      File file = File(dir.path + "/notes.json");
+      List<dynamic> temp = notes.map((each) => [each.name, each.id]).toList();
+      Map<String, dynamic> object = {"notes": temp, "completedNotes": completedNotes};
+      String jsonData = jsonEncode(object);
+      file.writeAsString(jsonData);
+    });
+  }
+
+  // Future<void> setTheState(EachNote each) async{
+  //   setState(() { 
+  //     notes = notes.where((element) => element.id != each.id).toList();
+  //     completedNotes.remove(each.id);
+      
+  //   });
+  // }
 
   Widget textInput() {
     if (selected) {
       return TextField(
+        controller: inputTextController,
         onChanged: (String str) {
           onTextChange(str);
         },
@@ -166,14 +200,7 @@ class _NotesState extends State<Notes> {
         title: Text(each.name, style: getStyle(each)),
         trailing: IconButton(
           icon: Icon(Icons.delete),
-          onPressed: () { 
-            setState(() { 
-              notes.remove(each);
-              if (completedNotes.contains(each)) completedNotes.remove(each);
-              widget.storage.setList(notes.map((each) => [each.name, each.id]).toList(), false);
-              widget.storage.setList(completedNotes, true);
-            });
-          },
+          onPressed: () => deleteClicked(each),
         ),
       ),
     );
@@ -188,13 +215,20 @@ class _NotesState extends State<Notes> {
         children: [
           animatedContainer(),
           Expanded(
-            child: Container(
-              child : ListView.builder(
-                itemCount: notes.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return listNotes(notes[index]);
-                },
-              )
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selected = false;
+                });
+              },
+              child: Container(
+                child : ListView.builder(
+                  itemCount: notes.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return listNotes(notes[index]);
+                  },
+                )
+              ),
             ),
           )
           // Text(notesData)

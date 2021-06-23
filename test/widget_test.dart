@@ -5,14 +5,19 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_app/Notes.dart';
 import 'package:notes_app/widgets/list_storage.dart';
 
 
 void main() {
-  test('test',() async{
-    final notes = Notes(storage: NotesStorage());
+  testWidgets('test the notes Widget',(WidgetTester tester) async{
+    final notes = MaterialApp(
+      home: Notes(storage: NotesStorage())
+      );
+    tester.pumpWidget(notes);
+    // int length = notes.
     // expect(notes.notesData
   });
 }

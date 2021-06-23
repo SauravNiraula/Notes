@@ -7,16 +7,6 @@ import 'package:path_provider/path_provider.dart';
 
 class NotesStorage {
 
-  // NotesStorage() {
-    // _localPath.then((path) {
-      // File("$path/notes.json").exists().then((exists) {
-      //   if (!exists) {
-      //     setJson('{"notes": [], "completedNotes": []}');
-      //   }
-      // });
-    // });
-  // }
-
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
 
@@ -36,14 +26,14 @@ class NotesStorage {
     return jsonStr;
   }
 
-  Future<void> setList(List<dynamic> notes, bool completed ) async {
+  void setList(List<dynamic> notes, bool completed ) async {
     Map<String, dynamic> data = jsonDecode(await getJson);
     if (!completed) data['notes'] = notes;
-    else data['completedNotes'] = notes;
+    else data['completedNotes'] = List<String>.from(notes);
     setJson(jsonEncode(data));
   }
 
-  Future<void> setJson(String jsonStr) async {
+  void setJson(String jsonStr) async {
     File file = await _localFile;
     file.writeAsString(jsonStr);
   } 

@@ -10,7 +10,8 @@ class NotesApp extends StatelessWidget {
     return MaterialApp(
       title: 'NotesApp',
       theme: ThemeData(
-        primarySwatch: Colors.blueGrey
+        primarySwatch: Colors.blueGrey,
+        backgroundColor: Colors.white
       ),
       home: Scaffold(
         appBar: AppBar(

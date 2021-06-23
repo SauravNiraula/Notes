@@ -1,4 +1,3 @@
-import 'dart:convert';
 import "package:notes_app/widgets/list_storage.dart";
 
 
@@ -11,13 +10,13 @@ class EachNote {
 void main() {
   NotesStorage storage = NotesStorage(); 
   List<EachNote> notes = [EachNote('adfadsfasdf', 'adsf'), EachNote('aaaa', 'aaa')];
+  // notes.remove(notes[1])
   // storage.setList(notes.map((each) => [each.name, each.id]).toList(), false);
-  // storage.getJson.then((value) => print(value));
   storage.getJson.then((value) {
-    Map<String, dynamic> notesData = jsonDecode(value);
-      // if (notesData['notes'].length > 0) update(notesData['notes'], false);
-    });
-  // notes.setList([['adfadsf', 'adfadsf']], false);
+    // Map<String, dynamic> notesData = jsonDecode(value);
+    print(value);
+  });
+  
 }
 
 void update(List<dynamic> notes) {
